@@ -19,7 +19,9 @@ dist-ssr/
 # IDEs
 .idea/
 *.iml
-.vscode/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/extensions.json
 *.swp
 *.swo
 .DS_Store

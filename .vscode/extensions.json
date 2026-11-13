@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-azuretools.vscode-docker",
+    "bradlc.vscode-tailwindcss",
+    "vscjava.vscode-java-pack",
+    "vmware.vscode-spring-boot"
+  ],
+  "java.configuration.updateBuildConfiguration": "automatic"
+}
