@@ -52,7 +52,7 @@ JobTrack is an enterprise-grade, full-stack recruitment and job application mana
 
 ---
 
-## 💻 Mandatory Technology Stack
+## 💻 Technology Stack
 
 ### Frontend
 - **Framework:** React.js (JavaScript ES6+, pure `.js` and `.jsx` files only)
@@ -72,7 +72,7 @@ JobTrack is an enterprise-grade, full-stack recruitment and job application mana
 - **Validation:** Jakarta Bean Validation (`@Valid`, `@NotBlank`, `@Email`, etc.)
 - **Documentation:** SpringDoc OpenAPI 3 / Swagger UI
 - **Database Drivers:** MySQL Connector/J 8 & H2 Database Engine for dev/testing
-- **Build Tool:** Apache Maven 3.9+
+- **Build Tool:** Apache Maven 3.9+ (includes `mvnw` wrapper)
 
 ### Database
 - **Engine:** MySQL 8+ (with zero-dependency embedded H2 fallback for instant development)
@@ -86,6 +86,8 @@ JobTrack is an enterprise-grade, full-stack recruitment and job application mana
 D:\JobTrack/
 ├── backend/                             # Spring Boot 3 Application
 │   ├── pom.xml                          # Maven build configuration
+│   ├── mvnw.cmd / mvnw.ps1              # Maven wrappers
+│   ├── Dockerfile                       # Production container build
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/com/jobtrack/
@@ -100,7 +102,7 @@ D:\JobTrack/
 │   │   │   │   ├── security/            # JwtUtil, JwtAuthenticationFilter, UserPrincipal
 │   │   │   │   └── service/             # Business logic interfaces & implementations
 │   │   │   └── resources/
-│   │   │       ├── application.properties
+│   │   │       ├── application.properties       # Default: dev profile
 │   │   │       ├── application-dev.properties   # H2 instant dev profile
 │   │   │       └── application-mysql.properties # Production MySQL profile
 │   │   └── test/java/com/jobtrack/      # JUnit 5 & Mockito test suites
@@ -108,6 +110,8 @@ D:\JobTrack/
 │   ├── package.json
 │   ├── vite.config.js                   # Reverse proxy configured for /api -> 8080
 │   ├── tailwind.config.js
+│   ├── Dockerfile                       # Production container build
+│   ├── nginx.conf                       # Production Nginx reverse proxy
 │   ├── index.html
 │   └── src/
 │       ├── components/                  # Navbar, Sidebar, JobCard, JobFilters, Modals
@@ -127,6 +131,10 @@ D:\JobTrack/
 ├── database/
 │   ├── schema.sql                       # Complete MySQL 8 DDL with foreign keys & indexes
 │   └── seed.sql                         # Rich seed data with BCrypt-hashed credentials
+├── .vscode/                             # VS Code tasks for 1-click execution & debugging
+├── docker-compose.yml                   # 1-Command full-stack container orchestration
+├── run-backend.bat                      # 1-Click Windows backend launcher
+├── run-frontend.bat                     # 1-Click Windows frontend launcher
 └── README.md
 ```
 
@@ -148,64 +156,52 @@ All pre-seeded test accounts use the password: **`Password@123`**
 
 ## 🚀 Quick Start Guide
 
-### Prerequisites
-- **Java:** JDK 17 or higher
-- **Node.js:** v18 or higher (v20+ recommended)
-- **Maven:** 3.8+ (or use wrapper)
-- **MySQL:** 8.0+ (optional: Spring Boot boots with an embedded persistent H2 store in `dev` mode if MySQL is not running)
+### Option A: 1-Click Startup (Windows)
+1. Double-click [**`run-backend.bat`**](file:///D:/JobTrack/run-backend.bat) (Starts Spring Boot on port `8080`).
+2. Double-click [**`run-frontend.bat`**](file:///D:/JobTrack/run-frontend.bat) (Starts React Vite on port `5173`).
+3. Open your browser at **[http://localhost:5173](http://localhost:5173)**.
 
 ---
 
-### Step 1: Database Setup (MySQL 8)
+### Option B: Terminal Startup
 
-1. Open your MySQL client (MySQL Workbench, DBeaver, or CLI):
+#### 1. Start the Backend (Port 8080)
+```powershell
+cd D:\JobTrack\backend
+mvn spring-boot:run
+```
+*(Or use `.\mvnw spring-boot:run`)*
+
+- Swagger API Docs: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- H2 Console: [http://localhost:8080/h2-console](http://localhost:8080/h2-console) (JDBC URL: `jdbc:h2:file:./data/jobtrack_dev`)
+
+#### 2. Start the Frontend (Port 5173)
+```powershell
+cd D:\JobTrack\frontend
+npm run dev
+```
+- Web Application: [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 🗄️ Database Setup (Optional: Using MySQL 8)
+
+By default, the backend boots with an embedded persistent database in `dev` mode with zero configuration.
+
+To switch to **MySQL 8**:
+1. Open your MySQL client and create the database:
    ```sql
    CREATE DATABASE jobtrack_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
-2. Execute the schema and seed scripts:
-   - Run [schema.sql](file:///D:/JobTrack/database/schema.sql)
-   - Run [seed.sql](file:///D:/JobTrack/database/seed.sql)
-
-*(Note: If you run Spring Boot with `-Dspring.profiles.active=dev`, it automatically creates an embedded database with tables and seeds initial users automatically without needing MySQL).*
-
----
-
-### Step 2: Start the Backend (Port 8080)
-
-1. Navigate to the backend directory:
-   ```bash
+2. Run the initialization scripts:
+   - Execute [**`database/schema.sql`**](file:///D:/JobTrack/database/schema.sql)
+   - Execute [**`database/seed.sql`**](file:///D:/JobTrack/database/seed.sql)
+3. Update credentials in [`backend/src/main/resources/application-mysql.properties`](file:///D:/JobTrack/backend/src/main/resources/application-mysql.properties).
+4. Run:
+   ```powershell
    cd D:\JobTrack\backend
-   ```
-2. Run with the dev profile (H2):
-   ```bash
-   mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
-   ```
-   Or run with MySQL:
-   ```bash
    mvn spring-boot:run "-Dspring-boot.run.profiles=mysql"
    ```
-3. Backend health and documentation will be accessible at:
-   - **OpenAPI Swagger UI:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-   - **H2 Console (dev profile):** [http://localhost:8080/h2-console](http://localhost:8080/h2-console) (JDBC URL: `jdbc:h2:file:./data/jobtrack_dev`)
-
----
-
-### Step 3: Start the Frontend (Port 5173)
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd D:\JobTrack\frontend
-   ```
-2. Install dependencies (if not already installed):
-   ```bash
-   npm install
-   ```
-3. Launch the development server:
-   ```bash
-   npm run dev
-   ```
-4. Open your browser at:
-   - **Web App:** [http://localhost:5173](http://localhost:5173)
 
 ---
 
@@ -257,35 +253,34 @@ All pre-seeded test accounts use the password: **`Password@123`**
 
 ## 🧪 Testing Suite
 
-### Backend Unit & Integration Tests
-Run backend tests with Maven:
-```bash
+### Backend Tests (JUnit 5 & Mockito)
+```powershell
 cd D:\JobTrack\backend
-mvn test "-Dspring.profiles.active=dev"
+mvn test
 ```
-**Test Coverage Includes:**
-- `ApplicationServiceTest`: Application submission, duplicate prevention, and status transition validation.
-- `AuthServiceTest`: User registration, credential hashing, and JWT token issuance.
-- `JobServiceTest`: Job creation, vacancy filtering, and recruiter authorization checks.
-- `JobTrackApplicationTests`: Full Spring context boot and JPA repository verification.
+- `ApplicationServiceTest`: Validates submission flow and stage advances.
+- `AuthServiceTest`: Validates BCrypt hashing, JWT generation, and credentials.
+- `JobServiceTest`: Validates CRUD and recruiter ownership security.
+- `JobTrackApplicationTests`: Validates full Spring context and JPA mappings.
 
 ### Frontend Production Build Test
-Verify frontend production bundling:
-```bash
+```powershell
 cd D:\JobTrack\frontend
 npm run build
 ```
 
 ---
 
-## 🛡️ Security Architecture
-- **Stateless Authentication:** Spring Security configured with `SessionCreationPolicy.STATELESS`.
-- **Password Hashing:** Passwords encrypted using `BCryptPasswordEncoder` with strength 10.
-- **RBAC Authorization:** Endpoints guarded via `@PreAuthorize("hasRole('CANDIDATE')")`, `hasRole('RECRUITER')`, or `hasRole('ADMIN')`.
-- **Safe File Storage:** Resume files saved with randomized UUID filenames outside the web root; files served through authenticated streaming controller endpoints with sanitized content headers.
-- **CORS Configuration:** Configured to allow requests from `http://localhost:5173` and `http://localhost:3000` with credential support.
+## 🐳 Docker Deployment
+
+To launch the complete stack (MySQL + Backend + Frontend/Nginx) with a single command:
+```powershell
+cd D:\JobTrack
+docker compose up -d --build
+```
+Access the application at `http://localhost`.
 
 ---
 
 ## 📄 License
-This project is open-source under the MIT License. Developed for software engineering portfolios, enterprise demonstrations, and Full Stack Java Developer interviews.
+This project is open-source under the MIT License. Built for full-stack portfolio showcases, production architectures, and Full Stack Java Developer interviews.
