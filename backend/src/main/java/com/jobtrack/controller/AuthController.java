@@ -1,6 +1,8 @@
 package com.jobtrack.controller;
 
+import com.jobtrack.dto.request.CandidateRegisterRequest;
 import com.jobtrack.dto.request.LoginRequest;
+import com.jobtrack.dto.request.RecruiterRegisterRequest;
 import com.jobtrack.dto.request.RegisterRequest;
 import com.jobtrack.dto.response.ApiResponse;
 import com.jobtrack.dto.response.AuthResponse;
@@ -31,6 +33,20 @@ public class AuthController {
         return new ResponseEntity<>(ApiResponse.ok("User registered successfully", response), HttpStatus.CREATED);
     }
 
+    @PostMapping("/register/candidate")
+    @Operation(summary = "Register a new candidate job seeker account")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerCandidate(@Valid @RequestBody CandidateRegisterRequest request) {
+        AuthResponse response = authService.registerCandidate(request);
+        return new ResponseEntity<>(ApiResponse.ok("Candidate registered successfully", response), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/register/recruiter")
+    @Operation(summary = "Register a new recruiter hiring manager account")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerRecruiter(@Valid @RequestBody RecruiterRegisterRequest request) {
+        AuthResponse response = authService.registerRecruiter(request);
+        return new ResponseEntity<>(ApiResponse.ok("Recruiter registered successfully", response), HttpStatus.CREATED);
+    }
+
     @PostMapping("/login")
     @Operation(summary = "Authenticate user and generate JWT access token")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
@@ -45,3 +61,4 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(user));
     }
 }
+

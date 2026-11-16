@@ -1,6 +1,8 @@
 package com.jobtrack.service.impl;
 
+import com.jobtrack.dto.request.CandidateRegisterRequest;
 import com.jobtrack.dto.request.LoginRequest;
+import com.jobtrack.dto.request.RecruiterRegisterRequest;
 import com.jobtrack.dto.request.RegisterRequest;
 import com.jobtrack.dto.response.AuthResponse;
 import com.jobtrack.dto.response.UserDto;
@@ -102,6 +104,102 @@ public class AuthServiceImpl implements AuthService {
                 .user(EntityMapper.toUserDto(savedUser))
                 .build();
     }
+
+    @Override
+    @Transactional
+    public AuthResponse registerCandidate(CandidateRegisterRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+        if (userRepository.existsByEmail(email)) {
+            throw new BadRequestException("An account with email " + email + " already exists");
+        }
+
+        User user = User.builder()
+                .email(email)
+                .password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getComputedFullName())
+                .phone(request.getPhone())
+                .role(Role.ROLE_CANDIDATE)
+                .status(UserStatus.ACTIVE)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        CandidateProfile candidateProfile = CandidateProfile.builder()
+                .user(savedUser)
+                .headline(request.getHeadline())
+                .location(request.getCurrentCity())
+                .experienceYears(0)
+                .skills("")
+                .build();
+        candidateProfileRepository.save(candidateProfile);
+
+        String token = jwtUtil.generateTokenFromEmail(
+                savedUser.getEmail(),
+                savedUser.getId(),
+                savedUser.getFullName(),
+                savedUser.getRole().name()
+        );
+
+        return AuthResponse.builder()
+                .token(token)
+                .tokenType("Bearer")
+                .user(EntityMapper.toUserDto(savedUser))
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public AuthResponse registerRecruiter(RecruiterRegisterRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+        if (userRepository.existsByEmail(email)) {
+            throw new BadRequestException("An account with email " + email + " already exists");
+        }
+
+        User user = User.builder()
+                .email(email)
+                .password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getComputedFullName())
+                .phone(request.getPhone())
+                .role(Role.ROLE_RECRUITER)
+                .status(UserStatus.ACTIVE)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        Company company = null;
+        if (request.getCompanyName() != null && !request.getCompanyName().trim().isEmpty()) {
+            String compName = request.getCompanyName().trim();
+            company = companyRepository.findByName(compName)
+                    .orElseGet(() -> companyRepository.save(Company.builder()
+                            .name(compName)
+                            .website(request.getCompanyWebsite())
+                            .address(request.getCompanyLocation())
+                            .description(request.getCompanyDescription())
+                            .build()));
+        }
+
+        RecruiterProfile recruiterProfile = RecruiterProfile.builder()
+                .user(savedUser)
+                .company(company)
+                .designation(request.getDesignation() != null ? request.getDesignation() : "Talent Recruiter")
+                .contactPhone(request.getPhone())
+                .build();
+        recruiterProfileRepository.save(recruiterProfile);
+
+        String token = jwtUtil.generateTokenFromEmail(
+                savedUser.getEmail(),
+                savedUser.getId(),
+                savedUser.getFullName(),
+                savedUser.getRole().name()
+        );
+
+        return AuthResponse.builder()
+                .token(token)
+                .tokenType("Bearer")
+                .user(EntityMapper.toUserDto(savedUser))
+                .build();
+    }
+
 
     @Override
     public AuthResponse login(LoginRequest request) {

@@ -19,13 +19,24 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+  const userRole = user?.role
+    ? typeof user.role === 'string'
+      ? user.role.replace('ROLE_', '')
+      : user.role
+    : null;
+
+  const normalizedAllowed = allowedRoles?.map((r) =>
+    typeof r === 'string' ? r.replace('ROLE_', '') : r
+  );
+
+  if (normalizedAllowed && !normalizedAllowed.includes(userRole)) {
     // Redirect to their default dashboard based on their role
-    if (user?.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
-    if (user?.role === 'RECRUITER') return <Navigate to="/recruiter/dashboard" replace />;
-    if (user?.role === 'CANDIDATE') return <Navigate to="/candidate/dashboard" replace />;
+    if (userRole === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
+    if (userRole === 'RECRUITER') return <Navigate to="/recruiter/dashboard" replace />;
+    if (userRole === 'CANDIDATE') return <Navigate to="/candidate/dashboard" replace />;
     return <Navigate to="/" replace />;
   }
+
 
   return children;
 };

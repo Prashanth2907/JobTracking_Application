@@ -55,7 +55,10 @@ export const RegisterPage = () => {
     setError('');
     setLoading(true);
     try {
-      await registerCandidate(candData);
+      await registerCandidate({
+        ...candData,
+        fullName: `${candData.firstName} ${candData.lastName}`.trim(),
+      });
       navigate('/candidate/dashboard');
     } catch (err) {
       setError(
@@ -71,7 +74,10 @@ export const RegisterPage = () => {
     setError('');
     setLoading(true);
     try {
-      await registerRecruiter(recData);
+      await registerRecruiter({
+        ...recData,
+        fullName: `${recData.firstName} ${recData.lastName}`.trim(),
+      });
       navigate('/recruiter/dashboard');
     } catch (err) {
       setError(

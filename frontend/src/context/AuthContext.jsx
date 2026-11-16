@@ -65,10 +65,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const userRole = user?.role
+    ? typeof user.role === 'string'
+      ? user.role.replace('ROLE_', '')
+      : user.role
+    : null;
+
   const value = {
     user,
     token,
-    role: user?.role || null,
+    role: userRole,
     isAuthenticated: !!token && !!user,
     loading,
     login,
@@ -77,6 +83,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     refreshUser,
   };
+
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

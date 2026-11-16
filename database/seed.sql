@@ -14,7 +14,10 @@ INSERT INTO users (id, email, password_hash, full_name, phone, role, status) VAL
 (3, 'alex.talent@innovatex.io', '$2a$10$7v59n8N1H.rFm5Zvh81aKOWvY0pmsiM/30Evy2tK198a0Fh05wHxe', 'Alex Rivera', '+1-555-0102', 'ROLE_RECRUITER', 'ACTIVE'),
 (4, 'john.dev@example.com', '$2a$10$7v59n8N1H.rFm5Zvh81aKOWvY0pmsiM/30Evy2tK198a0Fh05wHxe', 'John Doe', '+1-555-0201', 'ROLE_CANDIDATE', 'ACTIVE'),
 (5, 'emily.qa@example.com', '$2a$10$7v59n8N1H.rFm5Zvh81aKOWvY0pmsiM/30Evy2tK198a0Fh05wHxe', 'Emily Watson', '+1-555-0202', 'ROLE_CANDIDATE', 'ACTIVE'),
-(6, 'michael.cloud@example.com', '$2a$10$7v59n8N1H.rFm5Zvh81aKOWvY0pmsiM/30Evy2tK198a0Fh05wHxe', 'Michael Chang', '+1-555-0203', 'ROLE_CANDIDATE', 'ACTIVE');
+(6, 'michael.cloud@example.com', '$2a$10$7v59n8N1H.rFm5Zvh81aKOWvY0pmsiM/30Evy2tK198a0Fh05wHxe', 'Michael Chang', '+1-555-0203', 'ROLE_CANDIDATE', 'ACTIVE'),
+(7, 'recruiter@jobtrack.com', '$2a$10$7v59n8N1H.rFm5Zvh81aKOWvY0pmsiM/30Evy2tK198a0Fh05wHxe', 'Sarah Jenkins', '+1-555-0101', 'ROLE_RECRUITER', 'ACTIVE'),
+(8, 'candidate@jobtrack.com', '$2a$10$7v59n8N1H.rFm5Zvh81aKOWvY0pmsiM/30Evy2tK198a0Fh05wHxe', 'Alex Johnson', '+1-555-0200', 'ROLE_CANDIDATE', 'ACTIVE');
+
 
 -- 2. Companies
 INSERT INTO companies (id, name, description, website, industry, company_size, logo_url, address) VALUES
@@ -24,7 +27,9 @@ INSERT INTO companies (id, name, description, website, industry, company_size, l
 -- 3. Recruiter Profiles
 INSERT INTO recruiter_profiles (id, user_id, company_id, designation, department, contact_phone) VALUES
 (1, 2, 1, 'Senior Technical Talent Partner', 'Engineering Talent Acquisition', '+1-555-0101'),
-(2, 3, 2, 'Head of People & Recruiting', 'Human Resources', '+1-555-0102');
+(2, 3, 2, 'Head of People & Recruiting', 'Human Resources', '+1-555-0102'),
+(3, 7, 1, 'Lead Technical Recruiter', 'Talent Acquisition', '+1-555-0101');
+
 
 -- 4. Resumes
 INSERT INTO resumes (id, candidate_id, original_filename, stored_filename, file_type, file_size, storage_path) VALUES
@@ -45,7 +50,12 @@ INSERT INTO candidate_profiles (id, user_id, headline, bio, location, current_sa
 (3, 6, 'Cloud Infrastructure & DevOps Engineer', 'Specialist in AWS, Kubernetes, Terraform, Spring Boot orchestration, and zero-downtime deployments.', 'Seattle, WA', 130000.00, 150000.00, 7, 'AWS, Kubernetes, Docker, Terraform, CI/CD, Java, Spring Cloud, Linux, Prometheus', 
 '[{"degree":"M.S. in Information Systems","institution":"University of Washington","year":"2019","grade":"3.9 GPA"}]', 
 '[{"title":"Staff DevOps Engineer","company":"ScaleSystems","period":"2020 - Present","description":"Automated AWS multi-region infrastructure with Terraform."}]', 
-3);
+3),
+(4, 8, 'Full Stack Software Engineer', 'Passionate developer building responsive React applications and Spring Boot backends.', 'San Francisco, CA', 110000.00, 130000.00, 4, 'Java, Spring Boot, React.js, JavaScript, MySQL, Docker, REST APIs',
+'[{"degree":"B.S. in Computer Science","institution":"UC Berkeley","year":"2021","grade":"3.8 GPA"}]',
+'[{"title":"Software Engineer","company":"Innovate Soft","period":"2021 - Present","description":"Built full stack web features and RESTful backend APIs."}]',
+1);
+
 
 -- 6. Jobs
 INSERT INTO jobs (id, recruiter_id, company_id, title, company_name, description, requirements, skills_required, location, employment_type, experience_required, salary_min, salary_max, vacancies_count, deadline, status) VALUES

@@ -24,9 +24,10 @@ export const LoginPage = () => {
     try {
       const data = await login(email, password);
       // Route based on role
-      if (data.role === 'ADMIN') {
+      const userRole = data?.role ? String(data.role).replace('ROLE_', '') : '';
+      if (userRole === 'ADMIN') {
         navigate('/admin/dashboard');
-      } else if (data.role === 'RECRUITER') {
+      } else if (userRole === 'RECRUITER') {
         navigate('/recruiter/dashboard');
       } else {
         navigate('/candidate/dashboard');

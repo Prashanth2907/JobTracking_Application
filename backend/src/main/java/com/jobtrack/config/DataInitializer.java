@@ -45,13 +45,15 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        String encodedPassword = passwordEncoder.encode("Password@123");
+
         if (userRepository.count() > 0) {
-            log.info("JobTrack database already seeded. Skipping initial data creation.");
+            log.info("JobTrack database contains existing records. Verifying essential demo accounts...");
+            ensureDemoAccounts(encodedPassword);
             return;
         }
 
         log.info("Seeding initial JobTrack platform data...");
-        String encodedPassword = passwordEncoder.encode("Password@123");
 
         // 1. Create Admin
         User admin = userRepository.save(User.builder()
@@ -85,6 +87,23 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         // 3. Create Recruiters
+        User recruiterPrimary = userRepository.save(User.builder()
+                .email("recruiter@jobtrack.com")
+                .password(encodedPassword)
+                .fullName("Sarah Jenkins")
+                .phone("+1-555-0101")
+                .role(Role.ROLE_RECRUITER)
+                .status(UserStatus.ACTIVE)
+                .build());
+
+        recruiterProfileRepository.save(RecruiterProfile.builder()
+                .user(recruiterPrimary)
+                .company(techCorp)
+                .designation("Lead Technical Recruiter")
+                .department("Talent Acquisition")
+                .contactPhone("+1-555-0101")
+                .build());
+
         User recruiter1 = userRepository.save(User.builder()
                 .email("sarah.recruiter@techcorp.com")
                 .password(encodedPassword)
@@ -120,6 +139,38 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         // 4. Create Candidates
+        User candidatePrimary = userRepository.save(User.builder()
+                .email("candidate@jobtrack.com")
+                .password(encodedPassword)
+                .fullName("Alex Johnson")
+                .phone("+1-555-0200")
+                .role(Role.ROLE_CANDIDATE)
+                .status(UserStatus.ACTIVE)
+                .build());
+
+        Resume resumePrimary = resumeRepository.save(Resume.builder()
+                .candidate(candidatePrimary)
+                .originalFilename("Alex_Johnson_FullStack_Resume.pdf")
+                .storedFilename("resume_sample_alex_johnson.pdf")
+                .fileType("application/pdf")
+                .fileSize(148000L)
+                .storagePath("uploads/resumes/resume_sample_alex_johnson.pdf")
+                .build());
+
+        candidateProfileRepository.save(CandidateProfile.builder()
+                .user(candidatePrimary)
+                .headline("Full Stack Software Engineer (Java, React & Cloud)")
+                .bio("Motivated full stack developer with experience building responsive web apps with React and resilient Spring Boot microservices.")
+                .location("San Francisco, CA")
+                .currentSalary(BigDecimal.valueOf(110000.00))
+                .expectedSalary(BigDecimal.valueOf(130000.00))
+                .experienceYears(4)
+                .skills("Java, Spring Boot, React.js, JavaScript, MySQL, Docker, REST APIs")
+                .educationJson("[{\"degree\":\"B.S. in Computer Science\",\"institution\":\"UC Berkeley\",\"year\":\"2021\",\"grade\":\"3.8 GPA\"}]")
+                .experienceJson("[{\"title\":\"Software Engineer\",\"company\":\"Innovate Soft\",\"period\":\"2021 - Present\",\"description\":\"Built full stack web features and RESTful backend APIs.\"}]")
+                .activeResume(resumePrimary)
+                .build());
+
         User candidate1 = userRepository.save(User.builder()
                 .email("john.dev@example.com")
                 .password(encodedPassword)
@@ -151,6 +202,7 @@ public class DataInitializer implements CommandLineRunner {
                 .experienceJson("[{\"title\":\"Full Stack Developer\",\"company\":\"CloudTech Inc\",\"period\":\"2021 - Present\",\"description\":\"Led migration from monolith to Spring Boot microservices, decreasing latency by 35%.\"}]")
                 .activeResume(resume1)
                 .build());
+
 
         User candidate2 = userRepository.save(User.builder()
                 .email("emily.qa@example.com")
@@ -382,5 +434,107 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         log.info("JobTrack platform sample data seeded successfully!");
+    }
+
+    private void ensureDemoAccounts(String encodedPassword) {
+        userRepository.findByEmail("admin@jobtrack.com").ifPresentOrElse(
+                u -> {
+                    u.setPassword(encodedPassword);
+                    u.setStatus(UserStatus.ACTIVE);
+                    userRepository.save(u);
+                },
+                () -> {
+                    userRepository.save(User.builder()
+                            .email("admin@jobtrack.com")
+                            .password(encodedPassword)
+                            .fullName("System Administrator")
+                            .phone("+1-555-0100")
+                            .role(Role.ROLE_ADMIN)
+                            .status(UserStatus.ACTIVE)
+                            .build());
+                    log.info("Ensured demo admin account exists: admin@jobtrack.com");
+                }
+        );
+
+        Company company = companyRepository.findAll().stream().findFirst().orElseGet(() ->
+                companyRepository.save(Company.builder()
+                        .name("TechCorp Solutions")
+                        .description("Global enterprise cloud and software engineering powerhouse.")
+                        .website("https://techcorp-example.com")
+                        .industry("Information Technology")
+                        .companySize("500-1000 employees")
+                        .address("100 Innovation Way, Austin, TX")
+                        .build())
+        );
+
+        userRepository.findByEmail("recruiter@jobtrack.com").ifPresentOrElse(
+                u -> {
+                    u.setPassword(encodedPassword);
+                    u.setStatus(UserStatus.ACTIVE);
+                    userRepository.save(u);
+                },
+                () -> {
+                    User recruiter = userRepository.save(User.builder()
+                            .email("recruiter@jobtrack.com")
+                            .password(encodedPassword)
+                            .fullName("Sarah Jenkins")
+                            .phone("+1-555-0101")
+                            .role(Role.ROLE_RECRUITER)
+                            .status(UserStatus.ACTIVE)
+                            .build());
+
+                    recruiterProfileRepository.save(RecruiterProfile.builder()
+                            .user(recruiter)
+                            .company(company)
+                            .designation("Lead Technical Recruiter")
+                            .department("Talent Acquisition")
+                            .contactPhone("+1-555-0101")
+                            .build());
+                    log.info("Ensured demo recruiter account exists: recruiter@jobtrack.com");
+                }
+        );
+
+        userRepository.findByEmail("candidate@jobtrack.com").ifPresentOrElse(
+                u -> {
+                    u.setPassword(encodedPassword);
+                    u.setStatus(UserStatus.ACTIVE);
+                    userRepository.save(u);
+                },
+                () -> {
+                    User candidate = userRepository.save(User.builder()
+                            .email("candidate@jobtrack.com")
+                            .password(encodedPassword)
+                            .fullName("Alex Johnson")
+                            .phone("+1-555-0200")
+                            .role(Role.ROLE_CANDIDATE)
+                            .status(UserStatus.ACTIVE)
+                            .build());
+
+                    candidateProfileRepository.save(CandidateProfile.builder()
+                            .user(candidate)
+                            .headline("Full Stack Software Engineer")
+                            .bio("Full Stack Developer with expertise in React.js and Spring Boot.")
+                            .location("San Francisco, CA")
+                            .currentSalary(BigDecimal.valueOf(110000.00))
+                            .expectedSalary(BigDecimal.valueOf(130000.00))
+                            .experienceYears(4)
+                            .skills("Java, Spring Boot, React.js, JavaScript, MySQL, Docker, REST APIs")
+                            .build());
+                    log.info("Ensured demo candidate account exists: candidate@jobtrack.com");
+                }
+        );
+
+        // Also ensure legacy test accounts if they exist have Password@123
+        userRepository.findByEmail("sarah.recruiter@techcorp.com").ifPresent(u -> {
+            u.setPassword(encodedPassword);
+            u.setStatus(UserStatus.ACTIVE);
+            userRepository.save(u);
+        });
+
+        userRepository.findByEmail("john.dev@example.com").ifPresent(u -> {
+            u.setPassword(encodedPassword);
+            u.setStatus(UserStatus.ACTIVE);
+            userRepository.save(u);
+        });
     }
 }
